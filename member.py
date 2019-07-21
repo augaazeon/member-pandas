@@ -1,72 +1,82 @@
-import pandas as pd 
+import pandas as pd
 import numpy as np
 from openpyxl import load_workbook
-SalesDetails = pd.read_excel(r'C:\Users\20245\Desktop\»áÔ±µê0718\ºãĞË7.1-7.14ÏúÊÛÃ÷Ï¸.xlsx',dtype=str)
+SalesDetails = pd.read_excel(r'C:\Users\20245\Desktop\ä¼šå‘˜åº—0718\æ’å…´7.1-7.14é”€å”®æ˜ç»†.xlsx',dtype=str)
+SalesDetails['å®æ”¶é‡‘é¢'] = SalesDetails['å®æ”¶é‡‘é¢'].str.replace(',', '').astype('float64')#æµ®ç‚¹å‹#è´§å¸æ ¼å¼è½¬æ¢
+SalesDetails['å¼€å•æ—¥æœŸ'] = pd.to_datetime(SalesDetails['å¼€å•æ—¥æœŸ'])
 
-#ÏúÊÛÊıÁ¿
-SalesVolume = SalesDetails[['ÉÌÆ·´úÂë','ÊıÁ¿']]
-SalesVolume['ÊıÁ¿'] = SalesVolume['ÊıÁ¿'].astype('int')
-SalesVolume = SalesVolume.groupby(by=['ÉÌÆ·´úÂë'],as_index=False).sum()#  Êı¾İÀàĞÍÎÊÌâ
-#¶¯Ïú¿Í»§Êı
-Number_of_customers = SalesDetails[['¿Í»§´úÂë','ÉÌÆ·´úÂë']]
-Number_of_customers = Number_of_customers.drop_duplicates(['¿Í»§´úÂë','ÉÌÆ·´úÂë'],keep='first')  #ok
-Number_of_customers = Number_of_customers.groupby(by=['ÉÌÆ·´úÂë'],as_index=False).count()
-#¶¯ÏúÆµ´Î
-Frequency_of_sales = SalesDetails[['¿ªµ¥ÈÕÆÚ','ÉÌÆ·´úÂë']]
-Frequency_of_sales = Frequency_of_sales.drop_duplicates(['¿ªµ¥ÈÕÆÚ','ÉÌÆ·´úÂë'],keep='first') 
-Frequency_of_sales = Frequency_of_sales.groupby(by=['ÉÌÆ·´úÂë'],as_index=False).count()
-df1 = pd.merge(SalesVolume,Number_of_customers,on='ÉÌÆ·´úÂë',how='left')
-df2 = pd.merge(df1,Frequency_of_sales,on='ÉÌÆ·´úÂë',how='left')  #¹ı¶É±í£¬Ìá¹©¸ø¡®Õ½ÂÔÆ·ÖÖ¡¯
+#é”€å”®æ•°é‡
+SalesVolume = SalesDetails[['å•†å“ä»£ç ','æ•°é‡']]
+SalesVolume['æ•°é‡'] = SalesVolume['æ•°é‡'].astype('int')
+SalesVolume = SalesVolume.groupby(by=['å•†å“ä»£ç '],as_index=False).sum()#  æ•°æ®ç±»å‹é—®é¢˜
+#åŠ¨é”€å®¢æˆ·æ•°
+Number_of_customers = SalesDetails[['å®¢æˆ·ä»£ç ','å•†å“ä»£ç ']]
+Number_of_customers = Number_of_customers.drop_duplicates(['å®¢æˆ·ä»£ç ','å•†å“ä»£ç '],keep='first')  #ok
+Number_of_customers = Number_of_customers.groupby(by=['å•†å“ä»£ç '],as_index=False).count()
+#åŠ¨é”€é¢‘æ¬¡
+Frequency_of_sales = SalesDetails[['å¼€å•æ—¥æœŸ','å•†å“ä»£ç ']]
+Frequency_of_sales = Frequency_of_sales.drop_duplicates(['å¼€å•æ—¥æœŸ','å•†å“ä»£ç '],keep='first')
+Frequency_of_sales = Frequency_of_sales.groupby(by=['å•†å“ä»£ç '],as_index=False).count()
+df1 = pd.merge(SalesVolume,Number_of_customers,on='å•†å“ä»£ç ',how='left')
+df2 = pd.merge(df1,Frequency_of_sales,on='å•†å“ä»£ç ',how='left')  #è¿‡æ¸¡è¡¨ï¼Œæä¾›ç»™â€˜æˆ˜ç•¥å“ç§â€™
 
 
-#ÏúÊÛ¶î
-deadline = pd.to_datetime('2019-07-07')#½ØÖ¹ÈÕÆÚ
+
+deadline = pd.to_datetime('2019-07-07')#æˆªæ­¢æ—¥æœŸ
 deadline1 = pd.to_datetime('2019-07-14')
 deadline2 = pd.to_datetime('2019-07-21')
 deadline3 = pd.to_datetime('2019-07-28')
 deadline4 = pd.to_datetime('2019-07-31')
+#æ ¹æ®æˆªæ­¢æ—¥æœŸï¼Œä»¥å®¢æˆ·ä¸ºä¸»é”®ï¼Œå­—æ®µï¼šé”€å”®é¢ã€å“è§„æ•°
+def sale_product(deadline):
+    Sales = SalesDetails[SalesDetails['å¼€å•æ—¥æœŸ']<=deadline][['å¼€å•æ—¥æœŸ','å®¢æˆ·åç§°','å®æ”¶é‡‘é¢']].groupby(by=['å®¢æˆ·åç§°'],as_index=False).sum()#  æ•°æ®ç±»å‹é—®é¢˜
+    Number_of_products = SalesDetails[SalesDetails['å¼€å•æ—¥æœŸ']<=deadline][['å¼€å•æ—¥æœŸ','å®¢æˆ·åç§°','å“å/è§„æ ¼']].groupby(by=['å®¢æˆ·åç§°'],as_index=False).count() #å“è§„æ•°
+    df3 = pd.merge(Sales,Number_of_products,on='å®¢æˆ·åç§°',how='left')
+    del df3['å¼€å•æ—¥æœŸ']
+    return df3
+sale_product(deadline)
+ 
+# SalesDetails['å¼€å•æ—¥æœŸ'] = pd.to_datetime(SalesDetails['å¼€å•æ—¥æœŸ'])
+# Sales = SalesDetails[SalesDetails['å¼€å•æ—¥æœŸ']<=deadline]
+# Sales = Sales[['å¼€å•æ—¥æœŸ','å®¢æˆ·åç§°','å®æ”¶é‡‘é¢']]
+# Sales.groupby(by=['å®¢æˆ·åç§°'],as_index=False).sum()#  æ•°æ®ç±»å‹é—®é¢˜
+# Sales['å®æ”¶é‡‘é¢'] = Sales['å®æ”¶é‡‘é¢'].str.replace(',', '')#è´§å¸æ ¼å¼è½¬æ¢
+# Sales['å®æ”¶é‡‘é¢'] = Sales['å®æ”¶é‡‘é¢'].astype('float64')#æµ®ç‚¹å‹
+# Sales = Sales.groupby(by=['å®¢æˆ·åç§°'],as_index=False).sum()
+# #å“è§„æ•°
+# Number_of_products = SalesDetails[SalesDetails['å¼€å•æ—¥æœŸ']<=deadline]
+# Number_of_products = Number_of_products[['å¼€å•æ—¥æœŸ','å®¢æˆ·åç§°','å“å/è§„æ ¼']]
+# Number_of_products = Number_of_products.groupby(by=['å®¢æˆ·åç§°'],as_index=False).count()
+#
+# df3 = pd.merge(Sales,Number_of_products,on='å®¢æˆ·åç§°',how='left')  #è¿‡æ¸¡è¡¨ï¼Œæä¾›ç»™å“è§„æ±‡æ€»
+# del df3['å¼€å•æ—¥æœŸ']
 
-SalesDetails['¿ªµ¥ÈÕÆÚ'] = pd.to_datetime(SalesDetails['¿ªµ¥ÈÕÆÚ'])
-Sales = SalesDetails[SalesDetails['¿ªµ¥ÈÕÆÚ']<=deadline]
-Sales = Sales[['¿ªµ¥ÈÕÆÚ','¿Í»§Ãû³Æ','ÊµÊÕ½ğ¶î']]
-Sales.groupby(by=['¿Í»§Ãû³Æ'],as_index=False).sum()#  Êı¾İÀàĞÍÎÊÌâ
-Sales['ÊµÊÕ½ğ¶î'] = Sales['ÊµÊÕ½ğ¶î'].str.replace(',', '')#»õ±Ò¸ñÊ½×ª»»
-Sales['ÊµÊÕ½ğ¶î'] = Sales['ÊµÊÕ½ğ¶î'].astype('float64')#¸¡µãĞÍ
-Sales = Sales.groupby(by=['¿Í»§Ãû³Æ'],as_index=False).sum()
-#Æ·¹æÊı
-Number_of_products = SalesDetails[SalesDetails['¿ªµ¥ÈÕÆÚ']<=deadline]
-Number_of_products = Number_of_products[['¿ªµ¥ÈÕÆÚ','¿Í»§Ãû³Æ','Æ·Ãû/¹æ¸ñ']]
-Number_of_products = Number_of_products.groupby(by=['¿Í»§Ãû³Æ'],as_index=False).count()
 
-df3 = pd.merge(Sales,Number_of_products,on='¿Í»§Ãû³Æ',how='left')  #¹ı¶É±í£¬Ìá¹©¸øÆ·¹æ»ã×Ü
-del df3['¿ªµ¥ÈÕÆÚ']
+#æ’å…´å®ç»©  ï¼ˆè¯å“å®ç»©ï¼‰
+Customer_allocation = pd.read_excel(r'C:\Users\20245\Desktop\ä¼šå‘˜åº—é”€å”®æ•°æ®åˆ†æè¡¨-20190714 - å‰¯æœ¬.xlsx','7æœˆé”€å”®å“è§„åˆ†ææ±‡æ€»è¡¨ï¼ˆæ’å…´ï¼‰')
+Drug_name = pd.read_excel(r'C:\Users\20245\Desktop\ä¼šå‘˜åº—é”€å”®æ•°æ®åˆ†æè¡¨-20190714 - å‰¯æœ¬.xlsx','ç›®æ ‡å“ç§ç›®å½•',dtype=str)
+Performance = SalesDetails[SalesDetails['å•†å“ä»£ç '].isin(['0840900','0841000','0841100','2426400','2426401','2426402','0709901'])]
+Performance = pd.merge(Performance,Customer_allocation,on='å®¢æˆ·åç§°',how='left')
+Performance = pd.merge(Performance,Drug_name,on='å•†å“ä»£ç ',how='left')
+Performance = Performance[['æœ€æ–°åˆ†é…','åˆ†ç±»','å®¢æˆ·åç§°']]
+#Performance['æ•°é‡'] = Performance['æ•°é‡'].astype('int')
+Performance = Performance.groupby(by=['æœ€æ–°åˆ†é…','åˆ†ç±»'],as_index=False).count()
 
-
-#ºãĞËÊµ¼¨  £¨Ò©Æ·Êµ¼¨£©
-Customer_allocation = pd.read_excel(r'C:\Users\20245\Desktop\»áÔ±µêÏúÊÛÊı¾İ·ÖÎö±í-20190714 - ¸±±¾.xlsx','7ÔÂÏúÊÛÆ·¹æ·ÖÎö»ã×Ü±í£¨ºãĞË£©')
-Drug_name = pd.read_excel(r'C:\Users\20245\Desktop\»áÔ±µêÏúÊÛÊı¾İ·ÖÎö±í-20190714 - ¸±±¾.xlsx','Ä¿±êÆ·ÖÖÄ¿Â¼',dtype=str)
-Performance = SalesDetails[SalesDetails['ÉÌÆ·´úÂë'].isin(['0840900','0841000','0841100','2426400','2426401','2426402','0709901'])]
-Performance = pd.merge(Performance,Customer_allocation,on='¿Í»§Ãû³Æ',how='left')
-Performance = pd.merge(Performance,Drug_name,on='ÉÌÆ·´úÂë',how='left')
-Performance = Performance[['×îĞÂ·ÖÅä','·ÖÀà','¿Í»§Ãû³Æ']]
-#Performance['ÊıÁ¿'] = Performance['ÊıÁ¿'].astype('int') 
-Performance = Performance.groupby(by=['×îĞÂ·ÖÅä','·ÖÀà'],as_index=False).count()
-
-SalesDetails['ÊıÁ¿'] = SalesDetails['ÊıÁ¿'].astype(int)
-Store_sales = SalesDetails[SalesDetails['ÊıÁ¿']>0]
-Store_sales = pd.merge(Store_sales,Customer_allocation,on='¿Í»§Ãû³Æ',how='left')
-Store_sales = pd.merge(Store_sales,Drug_name,on='ÉÌÆ·´úÂë',how='left')
-Store_sales = Store_sales[['×îĞÂ·ÖÅä','¿Í»§Ãû³Æ']]
-Store_sales = Store_sales.drop_duplicates(['×îĞÂ·ÖÅä','¿Í»§Ãû³Æ'],keep='first')
-Store_sales = Store_sales.groupby(by=['×îĞÂ·ÖÅä'],as_index=False).count()
+SalesDetails['æ•°é‡'] = SalesDetails['æ•°é‡'].astype(int)
+Store_sales = SalesDetails[SalesDetails['æ•°é‡']>0]
+Store_sales = pd.merge(Store_sales,Customer_allocation,on='å®¢æˆ·åç§°',how='left')
+Store_sales = pd.merge(Store_sales,Drug_name,on='å•†å“ä»£ç ',how='left')
+Store_sales = Store_sales[['æœ€æ–°åˆ†é…','å®¢æˆ·åç§°']]
+Store_sales = Store_sales.drop_duplicates(['æœ€æ–°åˆ†é…','å®¢æˆ·åç§°'],keep='first')
+Store_sales = Store_sales.groupby(by=['æœ€æ–°åˆ†é…'],as_index=False).count()
 
 df4 = pd.concat([df2,df3,Performance,Store_sales],axis=1)
 df4.fillna('')
 
-#µ¼³öexcelÎÄ¼ş
-book = load_workbook(r'C:\Users\20245\Desktop\»áÔ±µêÏúÊÛÊı¾İ·ÖÎö±í-20190714 - ¸±±¾.xlsx')
-writer = pd.ExcelWriter(r'C:\Users\20245\Desktop\»áÔ±µêÏúÊÛÊı¾İ·ÖÎö±í-20190714 - ¸±±¾.xlsx', engine='openpyxl')
+#å¯¼å‡ºexcelæ–‡ä»¶
+book = load_workbook(r'C:\Users\20245\Desktop\ä¼šå‘˜åº—é”€å”®æ•°æ®åˆ†æè¡¨-20190714 - å‰¯æœ¬.xlsx')
+writer = pd.ExcelWriter(r'C:\Users\20245\Desktop\ä¼šå‘˜åº—é”€å”®æ•°æ®åˆ†æè¡¨-20190714 - å‰¯æœ¬.xlsx', engine='openpyxl')
 writer.book = book
 
-df4.to_excel(writer, '¹ı¶É±í')
+df4.to_excel(writer, 'è¿‡æ¸¡è¡¨')
 writer.save()
